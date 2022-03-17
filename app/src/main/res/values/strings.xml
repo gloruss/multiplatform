@@ -3,4 +3,5 @@
     <string name="favorite_breed">Favorite %1$s</string>
     <string name="unfavorite_breed">Unfavorite %1$s</string>
     <string name="empty_breeds">Sorry, no doggos found</string>
+    <string name="welcome">Welcome %1$s</string>
 </resources>

@@ -2,6 +2,7 @@ package co.touchlab.kampkit
 
 import co.touchlab.kampkit.db.Breed
 import co.touchlab.kampkit.db.KaMPKitDb
+import co.touchlab.kampkit.db.User
 import co.touchlab.kampkit.sqldelight.transactionWithContext
 import co.touchlab.kermit.Logger
 import com.squareup.sqldelight.db.SqlDriver
@@ -34,6 +35,13 @@ class DatabaseHelper(
         }
     }
 
+    suspend fun insertUser(user: co.touchlab.kampkit.response.User){
+        log.d { "Inserting ${user.email}  into database" }
+        dbRef.transactionWithContext(backgroundDispatcher){
+            dbRef.tableQueries.insertUser(user.idToken,user.email,user.refreshToken,user.uid)
+        }
+    }
+
     suspend fun selectById(id: Long): Flow<List<Breed>> =
         dbRef.tableQueries
             .selectById(id)
@@ -54,6 +62,18 @@ class DatabaseHelper(
             dbRef.tableQueries.updateFavorite(favorite.toLong(), breedId)
         }
     }
+
+
+     fun selectUser() : Flow<List<User>> =
+        dbRef.tableQueries
+            .selectAllUser()
+            .asFlow().mapToList()
+            .flowOn(backgroundDispatcher)
+
+
+    fun getUser() : User = dbRef.tableQueries.selectAllUser().executeAsList().first()
+
+
 }
 
 fun Breed.isFavorited(): Boolean = this.favorite != 0L

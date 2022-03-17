@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "189070594364",
+    "project_id": "multimenu",
+    "storage_bucket": "multimenu.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:189070594364:android:c252a8283b90e36b4e0e39",
+        "android_client_info": {
+          "package_name": "com.suappstudio.workers.androidApp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "189070594364-j33vk2rk1dq2ukt948c5nmako8epinmt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.suappstudio.workers.androidApp",
+            "certificate_hash": "d297a6b3c7a66c85beab80775593027ceb37957f"
+          }
+        },
+        {
+          "client_id": "189070594364-hu0b1lnusheb66obqjra7jvfshdrf8rb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0VsAl3izr4S7fs1MxPoW_KxHD7WQJIhE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "189070594364-hu0b1lnusheb66obqjra7jvfshdrf8rb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

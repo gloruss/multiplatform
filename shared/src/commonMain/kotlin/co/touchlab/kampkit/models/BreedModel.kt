@@ -95,6 +95,8 @@ class BreedModel : KoinComponent {
     suspend fun updateBreedFavorite(breed: Breed) {
         dbHelper.updateFavorite(breed.id, breed.favorite != 1L)
     }
+
+
 }
 
 data class ItemDataSummary(val longestItem: Breed?, val allItems: List<Breed>)

@@ -22,3 +22,40 @@ DELETE FROM Breed;
 
 updateFavorite:
 UPDATE Breed SET favorite = ? WHERE id = ?;
+
+
+CREATE TABLE User (
+idToken TEXT NOT NULL,
+email TEXT NOT NULL UNIQUE,
+refreshToken TEXT NOT NULL,
+uid TEXT NOT NULL
+);
+
+selectAllUser:
+SELECT * FROM User;
+
+insertUser:
+INSERT OR IGNORE INTO User(idToken,email,refreshToken,uid)
+VALUES (?,?,?,?);
+
+selectByEmail:
+SELECT * FROM User WHERE email = ?;
+
+updateRefreshToken:
+UPDATE User SET refreshToken = ?, idToken = ? WHERE email = ?;
+
+
+CREATE TABLE Worker (
+id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+name TEXT NOT NULL UNIQUE,
+uuid TEXT NOT NULL
+);
+
+insertWorker:
+INSERT OR IGNORE INTO Worker(id,name,uuid)
+VALUES (?,?,?);
+
+selectAllWorker:
+SELECT  * FROM Worker;
+
+

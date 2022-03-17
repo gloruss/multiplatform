@@ -2,9 +2,12 @@ package co.touchlab.kampkit
 
 import co.touchlab.kampkit.ktor.DogApi
 import co.touchlab.kampkit.ktor.DogApiImpl
+import co.touchlab.kampkit.ktor.UserApi
+import co.touchlab.kampkit.ktor.UserApiImpl
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.StaticConfig
 import co.touchlab.kermit.platformLogWriter
+import io.ktor.util.InternalAPI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.Clock
 import org.koin.core.KoinApplication
@@ -39,6 +42,7 @@ fun initKoin(appModule: Module): KoinApplication {
     return koinApplication
 }
 
+@OptIn(InternalAPI::class)
 private val coreModule = module {
     single {
         DatabaseHelper(
@@ -53,6 +57,13 @@ private val coreModule = module {
             get()
         )
     }
+    single<UserApi> {
+        UserApiImpl(
+            getWith("UserApiImpl"),
+            get()
+        )
+    }
+
     single<Clock> {
         Clock.System
     }

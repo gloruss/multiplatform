@@ -1,6 +1,9 @@
 package co.touchlab.kampkit.android.ui
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.widget.Toast
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.TweenSpec
@@ -10,40 +13,59 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.flowWithLifecycle
 import co.touchlab.kampkit.android.BreedViewModel
 import co.touchlab.kampkit.android.R
+import co.touchlab.kampkit.android.UserViewModel
 import co.touchlab.kampkit.db.Breed
 import co.touchlab.kampkit.models.DataState
 import co.touchlab.kampkit.models.ItemDataSummary
 import co.touchlab.kermit.Logger
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
+import com.google.zxing.qrcode.QRCodeWriter
 
 @Composable
 fun MainScreen(
     viewModel: BreedViewModel,
+    userViewModel: UserViewModel,
     log: Logger
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -51,17 +73,85 @@ fun MainScreen(
         viewModel.breedStateFlow.flowWithLifecycle(lifecycleOwner.lifecycle)
     }
 
+    val lifecycleAwareUserFlow = remember(userViewModel.userFlow,lifecycleOwner){
+        userViewModel.userFlow.flowWithLifecycle(lifecycleOwner.lifecycle)
+    }
+
     @SuppressLint("StateFlowValueCalledInComposition") // False positive lint check when used inside collectAsState()
     val dogsState by lifecycleAwareDogsFlow.collectAsState(viewModel.breedStateFlow.value)
 
-    MainScreenContent(
+    @SuppressLint("StateFlowValueCalledInComposition")
+    val userState by lifecycleAwareUserFlow.collectAsState(userViewModel.userFlow.value)
+
+    /*MainScreenContent(
         dogsState = dogsState,
         onRefresh = { viewModel.refreshBreeds(true) },
         onSuccess = { data -> log.v { "View updating with ${data.allItems.size} breeds" } },
         onError = { exception -> log.e { "Displaying error: $exception" } },
         onFavorite = { viewModel.updateBreedFavorite(it) }
-    )
+    )*/
+    UserScreenContent(userState = userState, onLoginClick = {email, password ->userViewModel.login(email,password)})
+
 }
+
+@Composable
+fun UserScreenContent(
+    userState : DataState<co.touchlab.kampkit.response.User>,
+    onLoginClick: (String, String) -> Unit
+){
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    Surface(
+        color = MaterialTheme.colors.background,
+        modifier = Modifier.fillMaxSize()
+    ){
+        if(userState.empty){
+            LoginFields(
+                email = email,
+                password = password,
+                onEmailChange = {
+                    email = it
+                },
+                onPasswordChange = {
+                    password = it
+                },
+                onLoginClick,
+                onSignUpClick = {
+                        email,password ->
+
+                }
+            )
+        }
+        else{
+            Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = stringResource(id = R.string.welcome,userState.data?.email ?: "trmon"))
+                val uid = userState.data?.uid
+                if(!uid.isNullOrEmpty()){
+                    Image(bitmap = getQrCodeBitmap(uid).asImageBitmap(), contentDescription = "Qrcode" )
+
+                }
+            }
+
+        }
+        }
+
+}
+
+
+private fun getQrCodeBitmap(uid: String): Bitmap {
+    val size = 512 //pixels
+    val qrCodeContent = uid
+    val hints = hashMapOf<EncodeHintType, Int>().also { it[EncodeHintType.MARGIN] = 1 } // Make the QR code buffer border narrower
+    val bits = QRCodeWriter().encode(qrCodeContent, BarcodeFormat.QR_CODE, size, size)
+    return Bitmap.createBitmap(size, size, Bitmap.Config.RGB_565).also {
+        for (x in 0 until size) {
+            for (y in 0 until size) {
+                it.setPixel(x, y, if (bits[x, y]) Color.BLACK else Color.WHITE)
+            }
+        }
+    }
+}
+
 
 @Composable
 fun MainScreenContent(
@@ -125,6 +215,81 @@ fun Error(error: String) {
         Text(text = error)
     }
 }
+
+@Composable
+fun LoginFields(
+    email: String,
+    password: String,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onLoginClick: (String,String) -> Unit,
+    onSignUpClick : (String,String) -> Unit
+) {
+    val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(400.dp),
+        verticalArrangement = Arrangement.spacedBy(25.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Please login")
+
+        OutlinedTextField(
+            value = email,
+            placeholder = { Text(text = "user@email.com") },
+            label = { Text(text = "email") },
+            onValueChange = onEmailChange,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
+        )
+
+        OutlinedTextField(
+            value = password,
+            placeholder = { Text(text = "password") },
+            label = { Text(text = "password") },
+            onValueChange = onPasswordChange,
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
+        )
+
+        Button(onClick = {
+            if (email.isBlank() == false && password.isBlank() == false) {
+                onLoginClick(email,password)
+                focusManager.clearFocus()
+            } else {
+                Toast.makeText(
+                    context,
+                    "Please enter an email and password",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }) {
+            Text("Login")
+        }
+
+        Button(onClick = {
+            if (email.isBlank() == false && password.isBlank() == false) {
+                onSignUpClick(email,password)
+                focusManager.clearFocus()
+            } else {
+                Toast.makeText(
+                    context,
+                    "Please enter an email and password",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }) {
+            Text("Register")
+        }
+
+    }
+}
+
+
 
 @Composable
 fun Success(
