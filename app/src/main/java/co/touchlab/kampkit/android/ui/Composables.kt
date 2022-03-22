@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -49,12 +50,15 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.flowWithLifecycle
+import androidx.navigation.NavController
 import co.touchlab.kampkit.android.BreedViewModel
 import co.touchlab.kampkit.android.R
 import co.touchlab.kampkit.android.UserViewModel
+import co.touchlab.kampkit.android.WorkerViewModel
 import co.touchlab.kampkit.db.Breed
 import co.touchlab.kampkit.models.DataState
 import co.touchlab.kampkit.models.ItemDataSummary
+import co.touchlab.kampkit.response.Worker
 import co.touchlab.kermit.Logger
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -66,8 +70,10 @@ import com.google.zxing.qrcode.QRCodeWriter
 fun MainScreen(
     viewModel: BreedViewModel,
     userViewModel: UserViewModel,
+    navController: NavController,
     log: Logger
 ) {
+
     val lifecycleOwner = LocalLifecycleOwner.current
     val lifecycleAwareDogsFlow = remember(viewModel.breedStateFlow, lifecycleOwner) {
         viewModel.breedStateFlow.flowWithLifecycle(lifecycleOwner.lifecycle)
@@ -76,6 +82,8 @@ fun MainScreen(
     val lifecycleAwareUserFlow = remember(userViewModel.userFlow,lifecycleOwner){
         userViewModel.userFlow.flowWithLifecycle(lifecycleOwner.lifecycle)
     }
+
+
 
     @SuppressLint("StateFlowValueCalledInComposition") // False positive lint check when used inside collectAsState()
     val dogsState by lifecycleAwareDogsFlow.collectAsState(viewModel.breedStateFlow.value)
@@ -90,9 +98,28 @@ fun MainScreen(
         onError = { exception -> log.e { "Displaying error: $exception" } },
         onFavorite = { viewModel.updateBreedFavorite(it) }
     )*/
-    UserScreenContent(userState = userState, onLoginClick = {email, password ->userViewModel.login(email,password)})
+    UserScreenContent(userState = userState, onLoginClick = {email, password ->userViewModel.login(email,password)}, )
+
+
 
 }
+
+@Composable
+fun WorkersScreen(
+    viewModel: WorkerViewModel,
+    log: Logger
+){
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycleAwareWorkesFlow = remember(viewModel.workersFlow,lifecycleOwner){
+        viewModel.workersFlow.flowWithLifecycle(lifecycleOwner.lifecycle)
+    }
+    @SuppressLint("StateFlowValueCalledInComposition")
+    val workersState by lifecycleAwareWorkesFlow.collectAsState(initial = viewModel.workersFlow.value)
+
+   WorkerScreenContent(workersState = workersState, viewModel)
+}
+
+
 
 @Composable
 fun UserScreenContent(
@@ -123,6 +150,8 @@ fun UserScreenContent(
             )
         }
         else{
+
+
             Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(text = stringResource(id = R.string.welcome,userState.data?.email ?: "trmon"))
                 val uid = userState.data?.uid
@@ -136,6 +165,9 @@ fun UserScreenContent(
         }
 
 }
+
+
+
 
 
 private fun getQrCodeBitmap(uid: String): Bitmap {
@@ -186,6 +218,36 @@ fun MainScreenContent(
                 }
                 Error(exception)
             }
+        }
+    }
+}
+
+
+@Composable
+fun WorkerScreenContent(
+    workersState : DataState<List<Worker>>,
+    workerViewModel: WorkerViewModel
+){
+    Surface(
+        color = MaterialTheme.colors.background,
+        modifier = Modifier.fillMaxSize()
+    ){
+
+
+
+        if(workersState.empty){
+            Empty()
+        }
+        val data = workersState.data
+        LaunchedEffect(key1 = data ){
+            workerViewModel.observeWorkers()
+        }
+        if(data != null){
+            WorkerList(workers = data)
+        }
+        val exception = workersState.exception
+        if(exception != null){
+            Error(exception)
         }
     }
 }
@@ -312,6 +374,17 @@ fun DogList(breeds: List<Breed>, onItemClick: (Breed) -> Unit) {
 }
 
 @Composable
+fun WorkerList(workers : List<Worker>){
+    LazyColumn{
+        items(workers){
+            WorkerRow(worker = it)
+            Divider()
+        }
+
+    }
+}
+
+@Composable
 fun DogRow(breed: Breed, onClick: (Breed) -> Unit) {
     Row(
         Modifier
@@ -320,6 +393,17 @@ fun DogRow(breed: Breed, onClick: (Breed) -> Unit) {
     ) {
         Text(breed.name, Modifier.weight(1F))
         FavoriteIcon(breed)
+    }
+}
+
+@Composable
+fun WorkerRow(worker: Worker){
+    Row(
+        Modifier.padding(10.dp)
+    ){
+        Text(text = worker.name, Modifier.weight(1F))
+        Spacer(Modifier.weight(1f))
+        Text(text = worker.uuid, Modifier.weight(1F))
     }
 }
 

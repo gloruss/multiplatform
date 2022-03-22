@@ -2,8 +2,7 @@ package co.touchlab.kampkit.ktor.worker
 
 import co.touchlab.kampkit.DatabaseHelper
 import co.touchlab.kampkit.FIREBASE_AUTH_REFRESH
-import co.touchlab.kampkit.FIREBASE_AUTH_SIGNIN
-import co.touchlab.kampkit.response.User
+
 import co.touchlab.kampkit.response.Worker
 import co.touchlab.kermit.Logger
 import co.touchlab.stately.ensureNeverFrozen
@@ -17,12 +16,14 @@ import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.forms.submitForm
+import io.ktor.client.request.get
 import io.ktor.http.Parameters
+import io.ktor.http.encodedPath
+import io.ktor.http.takeFrom
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.singleOrNull
+
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -87,7 +88,17 @@ class WorkerApiImpl(private val log: Logger, engine: HttpClientEngine, dbHelper:
 
 
     override suspend fun getWorkers(): List<Worker> {
-        TODO("Not yet implemented")
+       return httpClient.get{
+           workers("test/worker")
+       }.body<List<Worker>>()
+    }
+
+
+    private fun HttpRequestBuilder.workers(path: String) {
+        url {
+            takeFrom("http://192.168.1.127:8080/")
+            encodedPath = path
+        }
     }
 
 

@@ -4,6 +4,8 @@ import co.touchlab.kampkit.ktor.DogApi
 import co.touchlab.kampkit.ktor.DogApiImpl
 import co.touchlab.kampkit.ktor.UserApi
 import co.touchlab.kampkit.ktor.UserApiImpl
+import co.touchlab.kampkit.ktor.worker.WorkerApi
+import co.touchlab.kampkit.ktor.worker.WorkerApiImpl
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.StaticConfig
 import co.touchlab.kermit.platformLogWriter
@@ -60,6 +62,14 @@ private val coreModule = module {
     single<UserApi> {
         UserApiImpl(
             getWith("UserApiImpl"),
+            get()
+        )
+    }
+
+    single<WorkerApi> {
+        WorkerApiImpl(
+            getWith("WorkerApiImpl"),
+             get(),
             get()
         )
     }

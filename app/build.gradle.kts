@@ -18,8 +18,13 @@ android {
     }
     buildTypes {
         getByName("release") {
+            manifestPlaceholders["usesCleartextTraffic"] = "false"
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+
+        getByName("debug"){
+            manifestPlaceholders["usesCleartextTraffic"] = "true"
         }
     }
     compileOptions {
