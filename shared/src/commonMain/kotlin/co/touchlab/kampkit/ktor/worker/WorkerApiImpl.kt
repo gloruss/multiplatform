@@ -2,6 +2,7 @@ package co.touchlab.kampkit.ktor.worker
 
 import co.touchlab.kampkit.DatabaseHelper
 import co.touchlab.kampkit.FIREBASE_AUTH_REFRESH
+import co.touchlab.kampkit.ktor.request.WorkerRequest
 
 import co.touchlab.kampkit.response.Worker
 import co.touchlab.kermit.Logger
@@ -19,6 +20,11 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.Parameters
 import io.ktor.http.encodedPath
 import io.ktor.http.takeFrom
@@ -90,14 +96,30 @@ class WorkerApiImpl(private val log: Logger, engine: HttpClientEngine, dbHelper:
     override suspend fun getWorkers(): List<Worker> {
        return httpClient.get{
            workers("test/worker")
-       }.body<List<Worker>>()
+       }.body()
+    }
+
+    override suspend fun saveWorker(worker: WorkerRequest): Worker {
+        return httpClient.post{
+            saveWorker("test/worker")
+            setBody(worker)
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
+        }.body()
     }
 
 
     private fun HttpRequestBuilder.workers(path: String) {
         url {
-            takeFrom("http://192.168.1.127:8080/")
+            takeFrom("https://nasone.herokuapp.com/")
             encodedPath = path
+        }
+    }
+
+    private fun HttpRequestBuilder.saveWorker(path: String) {
+        url {
+            takeFrom("https://nasone.herokuapp.com/")
+            encodedPath = path
+
         }
     }
 

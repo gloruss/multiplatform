@@ -4,4 +4,7 @@
     <string name="unfavorite_breed">Unfavorite %1$s</string>
     <string name="empty_breeds">Sorry, no doggos found</string>
     <string name="welcome">Welcome %1$s</string>
+    <string name="create_worker_title">Insert new worker</string>
+    <string name="confirm">Confirm</string>
+
 </resources>

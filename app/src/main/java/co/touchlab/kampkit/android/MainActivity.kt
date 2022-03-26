@@ -17,7 +17,6 @@ import org.koin.core.component.KoinComponent
 class MainActivity : ComponentActivity(), KoinComponent {
 
     private val log: Logger by injectLogger("MainActivity")
-    private val viewModel: BreedViewModel by viewModel()
     private val userViewModel : UserViewModel by viewModel()
     private val workerViewModel : WorkerViewModel by viewModel()
 
@@ -26,9 +25,10 @@ class MainActivity : ComponentActivity(), KoinComponent {
         setContent {
             KaMPKitTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "workers" ){
+
+                NavHost(navController = navController, startDestination = "main" ){
                     composable("main"){
-                        MainScreen(viewModel, userViewModel, navController,log)
+                        MainScreen( userViewModel, navController,log)
                     }
                     composable("workers"){
                         WorkersScreen(viewModel = workerViewModel, log = log )
@@ -37,8 +37,6 @@ class MainActivity : ComponentActivity(), KoinComponent {
 
             }
         }
-       /* if (viewModel.breedStateFlow.value.data == null) {
-            viewModel.refreshBreeds()
-        }*/
+
     }
 }

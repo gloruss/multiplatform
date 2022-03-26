@@ -23,12 +23,20 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
+import androidx.compose.material.FabPosition
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -51,7 +59,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.flowWithLifecycle
 import androidx.navigation.NavController
-import co.touchlab.kampkit.android.BreedViewModel
 import co.touchlab.kampkit.android.R
 import co.touchlab.kampkit.android.UserViewModel
 import co.touchlab.kampkit.android.WorkerViewModel
@@ -68,16 +75,13 @@ import com.google.zxing.qrcode.QRCodeWriter
 
 @Composable
 fun MainScreen(
-    viewModel: BreedViewModel,
     userViewModel: UserViewModel,
     navController: NavController,
     log: Logger
 ) {
 
     val lifecycleOwner = LocalLifecycleOwner.current
-    val lifecycleAwareDogsFlow = remember(viewModel.breedStateFlow, lifecycleOwner) {
-        viewModel.breedStateFlow.flowWithLifecycle(lifecycleOwner.lifecycle)
-    }
+
 
     val lifecycleAwareUserFlow = remember(userViewModel.userFlow,lifecycleOwner){
         userViewModel.userFlow.flowWithLifecycle(lifecycleOwner.lifecycle)
@@ -85,11 +89,21 @@ fun MainScreen(
 
 
 
-    @SuppressLint("StateFlowValueCalledInComposition") // False positive lint check when used inside collectAsState()
-    val dogsState by lifecycleAwareDogsFlow.collectAsState(viewModel.breedStateFlow.value)
-
     @SuppressLint("StateFlowValueCalledInComposition")
     val userState by lifecycleAwareUserFlow.collectAsState(userViewModel.userFlow.value)
+
+    LaunchedEffect(key1 = Unit ){
+        userViewModel.userFlow.collect{
+            userState->
+            if(!userState.empty){
+                navController.navigate("workers")
+
+            }
+
+        }
+    }
+    UserScreenContent(userState = userState, onLoginClick = {email, password ->userViewModel.login(email,password)}, )
+
 
     /*MainScreenContent(
         dogsState = dogsState,
@@ -98,11 +112,19 @@ fun MainScreen(
         onError = { exception -> log.e { "Displaying error: $exception" } },
         onFavorite = { viewModel.updateBreedFavorite(it) }
     )*/
-    UserScreenContent(userState = userState, onLoginClick = {email, password ->userViewModel.login(email,password)}, )
+
+
 
 
 
 }
+
+@Composable
+fun WorkerRoute(){
+
+}
+
+
 
 @Composable
 fun WorkersScreen(
@@ -116,7 +138,7 @@ fun WorkersScreen(
     @SuppressLint("StateFlowValueCalledInComposition")
     val workersState by lifecycleAwareWorkesFlow.collectAsState(initial = viewModel.workersFlow.value)
 
-   WorkerScreenContent(workersState = workersState, viewModel)
+   WorkerScreenContent(workersState = workersState, onRefresh = {viewModel.refreshWorkers(true)}, onConfirm = {viewModel.saveWorker(it)})
 }
 
 
@@ -226,29 +248,76 @@ fun MainScreenContent(
 @Composable
 fun WorkerScreenContent(
     workersState : DataState<List<Worker>>,
-    workerViewModel: WorkerViewModel
-){
+    onRefresh: () -> Unit = {},
+    onConfirm : (String) -> Unit,
+
+    ){
+
+    val showDialog = remember { mutableStateOf(false) }
+    var name by remember { mutableStateOf("") }
+
     Surface(
         color = MaterialTheme.colors.background,
         modifier = Modifier.fillMaxSize()
     ){
 
+        SwipeRefresh(
+            state = rememberSwipeRefreshState(isRefreshing = workersState.loading),
+            onRefresh = onRefresh
+        ){
+            Scaffold(
+                floatingActionButtonPosition = FabPosition.End,
+                floatingActionButton = {
+                    FloatingActionButton(onClick = { showDialog.value = true }) {
+                        Icon(Icons.Filled.Add,"" )
+                    }
+                }
+
+            ) {
+
+                if(showDialog.value){
+                    AlertDialog(onDismissRequest = { showDialog.value = false},
+                        title = {
+                            Text(text = stringResource(id = R.string.create_worker_title))
+                        },
+                        text = {TextField(value = name , onValueChange = {name = it})},
+                        buttons = {
+                            Row(
+                                modifier = Modifier.padding(all = 8.dp),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Button(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClick = {
+                                        if(name.isNotEmpty()){
+                                            onConfirm(name)
+                                        }
+                                        showDialog.value = false }
+                                ) {
+                                    Text(stringResource(id = R.string.confirm))
+                                }
+                            }
+                        }
+                    )
+                }
+
+                if(workersState.empty){
+                    Empty()
+                }
+                val data = workersState.data
+
+                if(data != null){
+                    WorkerList(workers = data)
+                }
+                val exception = workersState.exception
+                if(exception != null){
+                    Error(exception)
+                }
+            }
+
+        }
 
 
-        if(workersState.empty){
-            Empty()
-        }
-        val data = workersState.data
-        LaunchedEffect(key1 = data ){
-            workerViewModel.observeWorkers()
-        }
-        if(data != null){
-            WorkerList(workers = data)
-        }
-        val exception = workersState.exception
-        if(exception != null){
-            Error(exception)
-        }
     }
 }
 

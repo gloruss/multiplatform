@@ -17,7 +17,7 @@ class UserViewModel : ViewModel(),KoinComponent {
     private val log: Logger by injectLogger("UserViewModel")
     private val scope = viewModelScope
     private val userModel = UserModel()
-    private val _userFlow : MutableStateFlow<DataState<User>> = MutableStateFlow(DataState(loading = true))
+    private val _userFlow : MutableStateFlow<DataState<User>> = MutableStateFlow(DataState(loading = true, empty = true))
     val userFlow : StateFlow<DataState<User>> = _userFlow
 
 
@@ -30,7 +30,7 @@ class UserViewModel : ViewModel(),KoinComponent {
             log.v("observing user")
             userModel.getUserFromCache().collect{
                 data ->
-                _userFlow.value = data
+                _userFlow.emit(data)
             }
         }
     }

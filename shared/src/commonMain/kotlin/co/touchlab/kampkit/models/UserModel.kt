@@ -27,7 +27,8 @@ class UserModel : KoinComponent{
                     val user = itemList[0]
                     DataState(
                         data = User(idToken = user.idToken, email = user.email, refreshToken = user.refreshToken, uid = user.uid,
-                        expiresIn = 0)
+                        expiresIn = 0),
+                        empty = false
                     )
                 }
 

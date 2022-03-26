@@ -3,6 +3,7 @@ package co.touchlab.kampkit
 import co.touchlab.kampkit.db.Breed
 import co.touchlab.kampkit.db.KaMPKitDb
 import co.touchlab.kampkit.db.User
+import co.touchlab.kampkit.db.Worker
 import co.touchlab.kampkit.sqldelight.transactionWithContext
 import co.touchlab.kermit.Logger
 import com.squareup.sqldelight.db.SqlDriver
@@ -22,6 +23,13 @@ class DatabaseHelper(
     fun selectAllItems(): Flow<List<Breed>> =
         dbRef.tableQueries
             .selectAll()
+            .asFlow()
+            .mapToList()
+            .flowOn(backgroundDispatcher)
+
+    fun selectAllWorkers() : Flow<List<Worker>> =
+        dbRef.tableQueries
+            .selectAllWorker()
             .asFlow()
             .mapToList()
             .flowOn(backgroundDispatcher)
@@ -72,6 +80,26 @@ class DatabaseHelper(
 
 
     fun getUser() : User = dbRef.tableQueries.selectAllUser().executeAsList().first()
+
+    fun getWorkers() : Flow<List<Worker>> =
+        dbRef.tableQueries
+            .selectAllWorker()
+            .asFlow()
+            .mapToList()
+            .flowOn(backgroundDispatcher)
+
+
+    suspend fun insertWorkers(workers : List<Worker>){
+        log.d { "Inserting ${workers.size} workers into database" }
+        dbRef.transactionWithContext(backgroundDispatcher){
+            workers.forEach {
+                worker ->
+                dbRef.tableQueries.insertWorker(worker.id,worker.name,worker.uuid)
+            }
+        }
+    }
+
+
 
 
 }
