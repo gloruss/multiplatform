@@ -2,7 +2,7 @@ package co.touchlab.kampkit.ktor.worker
 
 import co.touchlab.kampkit.DatabaseHelper
 import co.touchlab.kampkit.FIREBASE_AUTH_REFRESH
-import co.touchlab.kampkit.ktor.request.WorkerRequest
+import co.touchlab.kampkit.ktor.worker.request.WorkerRequest
 
 import co.touchlab.kampkit.response.Worker
 import co.touchlab.kermit.Logger

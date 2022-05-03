@@ -6,5 +6,7 @@
     <string name="welcome">Welcome %1$s</string>
     <string name="create_worker_title">Insert new worker</string>
     <string name="confirm">Confirm</string>
+    <string name="empty_results">Sorry, no results</string>
+    <string name="worker_list">Workers</string>
 
 </resources>

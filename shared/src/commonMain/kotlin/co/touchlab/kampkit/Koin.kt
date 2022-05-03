@@ -4,14 +4,30 @@ import co.touchlab.kampkit.ktor.DogApi
 import co.touchlab.kampkit.ktor.DogApiImpl
 import co.touchlab.kampkit.ktor.UserApi
 import co.touchlab.kampkit.ktor.UserApiImpl
+import co.touchlab.kampkit.ktor.badge.BadgeApi
+import co.touchlab.kampkit.ktor.badge.BadgeApiImpl
 import co.touchlab.kampkit.ktor.worker.WorkerApi
 import co.touchlab.kampkit.ktor.worker.WorkerApiImpl
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.StaticConfig
 import co.touchlab.kermit.platformLogWriter
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.plugins.ContentNegotiation
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.providers.BearerTokens
+import io.ktor.client.plugins.auth.providers.bearer
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.request.forms.submitForm
+import io.ktor.http.Parameters
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.InternalAPI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.Clock
+import kotlinx.serialization.json.Json
 import org.koin.core.KoinApplication
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -74,8 +90,70 @@ private val coreModule = module {
         )
     }
 
+    single<BadgeApi>{
+        BadgeApiImpl(get())
+    }
+
     single<Clock> {
         Clock.System
+    }
+
+    fun provideHttpClient(engine: HttpClientEngine, dbHelper: DatabaseHelper, log: Logger) : HttpClient =
+        HttpClient(engine){
+            install(ContentNegotiation) {
+                json(Json{ ignoreUnknownKeys = true })
+            }
+            install(Logging) {
+                logger = object : io.ktor.client.plugins.logging.Logger {
+                    override fun log(message: String) {
+                        log.v { message }
+                    }
+                }
+
+                level = LogLevel.INFO
+            }
+            install(HttpTimeout) {
+                val timeout = 30000L
+                connectTimeoutMillis = timeout
+                requestTimeoutMillis = timeout
+                socketTimeoutMillis = timeout
+            }
+
+            install(Auth){
+                lateinit var tokenInfo: WorkerApiImpl.TokenInfo
+                var refreshTokenInfo: WorkerApiImpl.TokenInfo
+
+                bearer {
+                    val tokenClient = HttpClient(engine){
+                        install(ContentNegotiation) {
+                            json(Json{ ignoreUnknownKeys = true })
+                        }
+                    }
+                    loadTokens {
+
+                        val user =  dbHelper.getUser()
+                        BearerTokens(user.idToken,user.refreshToken)
+
+                    }
+                    refreshTokens {
+                        val user =  dbHelper.getUser()
+                        refreshTokenInfo = tokenClient.submitForm(
+                            url = FIREBASE_AUTH_REFRESH,
+                            formParameters = Parameters.build {
+                                append("grant_type","refresh_token")
+                                append("refresh_token",user.refreshToken)
+                            }
+                        ).body()
+                        BearerTokens(refreshTokenInfo.idToken,refreshTokenInfo.refreshToken)
+
+                    }
+                }
+            }
+        }
+
+
+    single {
+        provideHttpClient(get(),get(),getWith("Httpclient"))
     }
 
     // platformLogWriter() is a relatively simple config option, useful for local debugging. For production

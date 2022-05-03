@@ -1,9 +1,9 @@
-package co.touchlab.kampkit.android
+package co.touchlab.kampkit.android.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kampkit.injectLogger
-import co.touchlab.kampkit.ktor.request.WorkerRequest
+import co.touchlab.kampkit.ktor.worker.request.WorkerRequest
 import co.touchlab.kampkit.models.DataState
 import co.touchlab.kampkit.models.WorkersModel
 import co.touchlab.kampkit.response.Worker
@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.flattenMerge
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
+import java.text.SimpleDateFormat
 
 class WorkerViewModel : ViewModel(), KoinComponent {
 

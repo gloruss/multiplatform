@@ -1,4 +1,4 @@
-package co.touchlab.kampkit.ktor.request
+package co.touchlab.kampkit.ktor.worker.request
 
 import kotlinx.serialization.Serializable
 

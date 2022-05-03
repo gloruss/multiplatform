@@ -1,6 +1,6 @@
 package co.touchlab.kampkit.ktor.worker
 
-import co.touchlab.kampkit.ktor.request.WorkerRequest
+import co.touchlab.kampkit.ktor.worker.request.WorkerRequest
 import co.touchlab.kampkit.response.Worker
 
 interface WorkerApi {

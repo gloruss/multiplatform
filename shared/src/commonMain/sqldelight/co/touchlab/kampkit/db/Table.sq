@@ -59,3 +59,17 @@ selectAllWorker:
 SELECT  * FROM Worker;
 
 
+CREATE TABLE Badge(
+id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+date TEXT NOT NULL,
+start TEXT,
+end TEXT,
+worker_id INTEGER NOT NULL,
+worker_uuid TEXT,
+hours INTEGER,
+type TEXT
+);
+
+insertBadge:
+INSERT OR IGNORE INTO Badge(id,date,start,end,worker_id,worker_uuid,hours,type)
+VALUES (?,?,?,?,?,?,?,?);

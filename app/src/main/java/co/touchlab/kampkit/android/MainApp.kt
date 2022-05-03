@@ -5,6 +5,10 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import co.touchlab.kampkit.AppInfo
+import co.touchlab.kampkit.android.ui.viewmodel.BadgeViewModel
+import co.touchlab.kampkit.android.ui.viewmodel.BreedViewModel
+import co.touchlab.kampkit.android.ui.viewmodel.UserViewModel
+import co.touchlab.kampkit.android.ui.viewmodel.WorkerViewModel
 import co.touchlab.kampkit.initKoin
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -17,8 +21,9 @@ class MainApp : Application() {
             module {
                 single<Context> { this@MainApp }
                 viewModel { BreedViewModel() }
-                viewModel {UserViewModel()}
-                viewModel {WorkerViewModel()}
+                viewModel { UserViewModel() }
+                viewModel { WorkerViewModel() }
+                viewModel{ BadgeViewModel()}
                 single<SharedPreferences> {
                     get<Context>().getSharedPreferences("KAMPSTARTER_SETTINGS", Context.MODE_PRIVATE)
                 }

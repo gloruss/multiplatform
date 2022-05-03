@@ -2,7 +2,7 @@ package co.touchlab.kampkit.models
 
 import co.touchlab.kampkit.DatabaseHelper
 import co.touchlab.kampkit.injectLogger
-import co.touchlab.kampkit.ktor.request.WorkerRequest
+import co.touchlab.kampkit.ktor.worker.request.WorkerRequest
 import co.touchlab.kampkit.ktor.worker.WorkerApi
 import co.touchlab.kampkit.response.Worker
 import co.touchlab.kampkit.response.toDB

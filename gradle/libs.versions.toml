@@ -5,7 +5,7 @@ targetSdk = "31"
 compileSdk = "31"
 
 # Dependencies
-compose = "1.1.0-rc01"
+compose = "1.1.1"
 composeCompiler = "1.1.0-rc02"
 coroutines = "1.6.0"
 multiplatformSettings = "0.8.1"
@@ -15,6 +15,7 @@ ktor = "2.0.0-beta-1"
 lifecycle = "2.4.0"
 sqlDelight = "1.5.3"
 nav ="2.4.1"
+camera="1.1.0-beta03"
 
 [libraries]
 
@@ -46,6 +47,7 @@ junit = { module = "junit:junit", version = "4.13.2" }
 
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-compose = {module ="io.insert-koin:koin-androidx-compose", version.ref = "koin"}
 koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
 
 kotlinx-dateTime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version = "0.3.1" }
@@ -76,6 +78,12 @@ touchlab-stately = { module = "co.touchlab:stately-common", version = "1.2.1" }
 turbine = { module = "app.cash.turbine:turbine", version = "0.7.0" }
 zxing = {module="com.google.zxing:core", version = "3.4.0"}
 
+camera2 ={module="androidx.camera:camera-camera2", version.ref="camera"}
+camera-lifecycle= {module="androidx.camera:camera-lifecycle",version.ref="camera"}
+camera-view= {module="androidx.camera:camera-view", version.ref="camera"}
+camera-core={module="androidx.camera:camera-core", version.ref="camera"}
+
+
 [bundles]
 app-ui = [
     "compose-compiler",
@@ -89,7 +97,11 @@ app-ui = [
     "compose-navigation",
     "compose-activity",
     "google-accompanist-swipeRefresh",
-    "zxing"
+    "zxing",
+    "camera2",
+    "camera-lifecycle",
+    "camera-view",
+    "camera-core"
 ]
 gradlePlugins = [
     "gradlePlugin-android",

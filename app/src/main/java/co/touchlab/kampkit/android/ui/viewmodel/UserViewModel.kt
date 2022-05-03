@@ -1,5 +1,6 @@
-package co.touchlab.kampkit.android
+package co.touchlab.kampkit.android.ui.viewmodel
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kampkit.injectLogger
@@ -19,7 +20,8 @@ class UserViewModel : ViewModel(),KoinComponent {
     private val userModel = UserModel()
     private val _userFlow : MutableStateFlow<DataState<User>> = MutableStateFlow(DataState(loading = true, empty = true))
     val userFlow : StateFlow<DataState<User>> = _userFlow
-
+    private val _isLoggedIn = mutableStateOf(false)
+    val isLoggedIn = _isLoggedIn
 
     init {
         observeUser()
@@ -31,6 +33,7 @@ class UserViewModel : ViewModel(),KoinComponent {
             userModel.getUserFromCache().collect{
                 data ->
                 _userFlow.emit(data)
+                _isLoggedIn.value = data.data != null
             }
         }
     }
