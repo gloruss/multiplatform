@@ -87,7 +87,7 @@ fun WorkerScreenContent(
                 ) }
             ) {
                 innerPadding ->
-                Box(modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())){
+                Box(){
                     if(showDialog.value){
                         AlertDialog(onDismissRequest = { showDialog.value = false},
                             title = {

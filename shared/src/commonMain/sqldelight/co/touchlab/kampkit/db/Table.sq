@@ -58,6 +58,9 @@ VALUES (?,?,?);
 selectAllWorker:
 SELECT  * FROM Worker;
 
+selectWorkerById:
+SELECT * FROM Worker WHERE uuid = ?;
+
 
 CREATE TABLE Badge(
 id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,

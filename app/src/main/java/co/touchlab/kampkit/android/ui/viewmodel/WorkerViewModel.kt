@@ -14,13 +14,14 @@ import kotlinx.coroutines.flow.flattenMerge
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.text.SimpleDateFormat
 
 class WorkerViewModel : ViewModel(), KoinComponent {
 
     private val log: Logger by injectLogger("WorkerViewModel")
     private val scope = viewModelScope
-    private val workerModel = WorkersModel()
+    private val workerModel by inject<WorkersModel>()
     private val _workersFlow : MutableStateFlow<DataState<List<Worker>>> = MutableStateFlow(DataState(loading = true, empty = true))
     val workersFlow: StateFlow<DataState<List<Worker>>> = _workersFlow
 

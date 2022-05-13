@@ -9,9 +9,12 @@ import co.touchlab.kermit.Logger
 import com.squareup.sqldelight.db.SqlDriver
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
+import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.singleOrNull
 
 class DatabaseHelper(
     sqlDriver: SqlDriver,
@@ -34,14 +37,7 @@ class DatabaseHelper(
             .mapToList()
             .flowOn(backgroundDispatcher)
 
-    suspend fun insertBreeds(breeds: List<Breed>) {
-        log.d { "Inserting ${breeds.size} breeds into database" }
-        dbRef.transactionWithContext(backgroundDispatcher) {
-            breeds.forEach { breed ->
-                dbRef.tableQueries.insertBreed(null, breed.name)
-            }
-        }
-    }
+
 
     suspend fun insertUser(user: co.touchlab.kampkit.response.User){
         log.d { "Inserting ${user.email}  into database" }
@@ -64,12 +60,7 @@ class DatabaseHelper(
         }
     }
 
-    suspend fun updateFavorite(breedId: Long, favorite: Boolean) {
-        log.i { "Breed $breedId: Favorited $favorite" }
-        dbRef.transactionWithContext(backgroundDispatcher) {
-            dbRef.tableQueries.updateFavorite(favorite.toLong(), breedId)
-        }
-    }
+
 
 
      fun selectUser() : Flow<List<User>> =
@@ -81,12 +72,18 @@ class DatabaseHelper(
 
     fun getUser() : User = dbRef.tableQueries.selectAllUser().executeAsList().first()
 
-    fun getWorkers() : Flow<List<Worker>> =
+
+
+
+     fun getWorker(uuid : String) : Worker? =
         dbRef.tableQueries
-            .selectAllWorker()
-            .asFlow()
-            .mapToList()
-            .flowOn(backgroundDispatcher)
+            .selectWorkerById(uuid)
+            .executeAsOneOrNull()
+
+
+
+
+
 
 
     suspend fun insertWorkers(workers : List<Worker>){
@@ -104,5 +101,4 @@ class DatabaseHelper(
 
 }
 
-fun Breed.isFavorited(): Boolean = this.favorite != 0L
-internal fun Boolean.toLong(): Long = if (this) 1L else 0L
+

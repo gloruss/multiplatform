@@ -10,6 +10,7 @@ import co.touchlab.kampkit.android.ui.viewmodel.BreedViewModel
 import co.touchlab.kampkit.android.ui.viewmodel.UserViewModel
 import co.touchlab.kampkit.android.ui.viewmodel.WorkerViewModel
 import co.touchlab.kampkit.initKoin
+import co.touchlab.kampkit.models.WorkersModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -31,6 +32,7 @@ class MainApp : Application() {
                 single {
                     { Log.i("Startup", "Hello from Android/Kotlin!") }
                 }
+                single{WorkersModel()}
             }
         )
     }

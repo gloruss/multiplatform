@@ -6,7 +6,6 @@ import co.touchlab.kampkit.ktor.badge.BadgeApi
 import co.touchlab.kampkit.ktor.badge.request.BadgeRequest
 import co.touchlab.kampkit.response.Badge
 import co.touchlab.kermit.Logger
-import kotlinx.datetime.DateTimePeriod
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -20,6 +19,7 @@ class BadgeModel : KoinComponent {
 
     suspend fun badge(badgeRequest: BadgeRequest) : DataState<Badge>{
         return try {
+
             val result = api.insertBadge(badgeRequest)
             DataState(result, empty = false)
         }

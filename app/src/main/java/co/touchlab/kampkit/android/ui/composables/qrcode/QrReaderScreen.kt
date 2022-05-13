@@ -102,7 +102,7 @@ fun QrCodeScannerContent(lifecycleOwner: LifecycleOwner,context : Context,badgeS
         mutableStateOf(true)
     }
 
-    if(badgeState.data != null){
+    if(!badgeState.empty){
         showBadgeResult = true
     }
 
@@ -115,7 +115,7 @@ fun QrCodeScannerContent(lifecycleOwner: LifecycleOwner,context : Context,badgeS
         analyzeQrCode = true}) {
             Text(text = "OK")
         } },
-        title = { Text(text = "${badgeState.data?.worker_uuid} confirmed")})
+        title = { Text(text =if(badgeState.data != null) "${badgeState.data?.worker_uuid} confirmed" else "Error ${badgeState.exception}") })
     }
 
     val preview = Preview.Builder().build()

@@ -6,6 +6,7 @@ import co.touchlab.kampkit.ktor.worker.request.WorkerRequest
 import co.touchlab.kampkit.ktor.worker.WorkerApi
 import co.touchlab.kampkit.response.Worker
 import co.touchlab.kampkit.response.toDB
+import co.touchlab.kampkit.response.toObject
 import co.touchlab.kermit.Logger
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.Flow
@@ -19,7 +20,7 @@ class WorkersModel : KoinComponent {
     private val clock: Clock by inject()
     private val settings: Settings by inject()
     private val dbHelper: DatabaseHelper by inject()
-    private val workerApi : WorkerApi by inject()
+    private val workerApi: WorkerApi by inject()
     private val log: Logger by injectLogger("WorkerModel")
 
     companion object {
@@ -34,23 +35,21 @@ class WorkersModel : KoinComponent {
         if (stale || forced) {
             networkWorkers = getWorkerFromNetwork(currentTimeMS)
             if (networkWorkers.data != null) {
-                dbHelper.insertWorkers(networkWorkers.data.map { worker -> worker.toDB()  })
+                dbHelper.insertWorkers(networkWorkers.data.map { worker -> worker.toDB() })
             } else {
                 emit(networkWorkers)
             }
         }
     }
 
-
-    suspend fun getWorkerFromNetwork(currentTimeMS: Long) : DataState<List<Worker>>{
+    suspend fun getWorkerFromNetwork(currentTimeMS: Long): DataState<List<Worker>> {
         return try {
             val response = workerApi.getWorkers()
             settings.putLong(DB_TIMESTAMP_KEY_WORKERS, currentTimeMS)
             DataState(data = response, empty = false)
-        }
-        catch (exception : Exception){
+        } catch (exception: Exception) {
             log.e(exception) { "Error get workers" }
-            DataState(exception = "Unable get workers",empty = false)
+            DataState(exception = "Unable get workers", empty = false)
         }
     }
 
@@ -64,33 +63,36 @@ class WorkersModel : KoinComponent {
         return stale
     }
 
-
-    suspend fun  getWorkersFromCache() :Flow<DataState<List<Worker>>> =
+    suspend fun getWorkersFromCache(): Flow<DataState<List<Worker>>> =
         dbHelper.selectAllWorkers()
-            .mapNotNull {
-                list ->
-                if(list.isEmpty())
+            .mapNotNull { list ->
+                if (list.isEmpty())
                     null
-                else{
-                    DataState(data = list.map {worker -> Worker(worker.id,worker.name,worker.uuid)   })
+                else {
+                    DataState(data = list.map { worker ->
+                        Worker(
+                            worker.id,
+                            worker.name,
+                            worker.uuid
+                        )
+                    })
                 }
             }
 
-
-
-    suspend fun insertWorker(worker: WorkerRequest) : DataState<Worker>{
+    suspend fun insertWorker(worker: WorkerRequest): DataState<Worker> {
         return try {
             val response = workerApi.saveWorker(worker)
             dbHelper.insertWorkers(listOf(response.toDB()))
             DataState(response, empty = false)
-        }
-        catch (exception : Exception){
+        } catch (exception: Exception) {
             log.e(exception) { "Error insert workers" }
-            DataState(exception = "Unable insert workers",empty = false)
+            DataState(exception = "Unable insert workers", empty = false)
         }
     }
 
-
-
-
+    fun getWorkerById(workerUID: String): Worker? {
+        return dbHelper.getWorker(workerUID)?.run {
+            this.toObject()
+        }
+    }
 }

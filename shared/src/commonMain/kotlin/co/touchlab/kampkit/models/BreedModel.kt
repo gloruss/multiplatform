@@ -37,7 +37,7 @@ class BreedModel : KoinComponent {
         if (stale || forced) {
             networkBreedDataState = getBreedsFromNetwork(currentTimeMS)
             if (networkBreedDataState.data != null) {
-                dbHelper.insertBreeds(networkBreedDataState.data.allItems)
+              //  dbHelper.insertBreeds(networkBreedDataState.data.allItems)
             } else {
                 emit(networkBreedDataState)
             }
@@ -93,7 +93,7 @@ class BreedModel : KoinComponent {
     }
 
     suspend fun updateBreedFavorite(breed: Breed) {
-        dbHelper.updateFavorite(breed.id, breed.favorite != 1L)
+      //  dbHelper.updateFavorite(breed.id, breed.favorite != 1L)
     }
 
 
