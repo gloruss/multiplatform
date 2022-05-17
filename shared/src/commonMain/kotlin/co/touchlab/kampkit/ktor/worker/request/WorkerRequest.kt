@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class WorkerRequest(
     val name : String,
-    val uuid : String
+    val uuid : String? = null
 )

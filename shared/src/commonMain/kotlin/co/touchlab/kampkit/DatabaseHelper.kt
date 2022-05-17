@@ -82,7 +82,9 @@ class DatabaseHelper(
 
 
 
-
+    suspend fun deleteWorker(uuid: String)=
+        dbRef.tableQueries
+            .deleteWorkerById(uuid)
 
 
 

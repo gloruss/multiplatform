@@ -1,7 +1,9 @@
 package co.touchlab.kampkit.ktor.worker
 
+import co.touchlab.kampkit.BASE_URL
 import co.touchlab.kampkit.DatabaseHelper
 import co.touchlab.kampkit.FIREBASE_AUTH_REFRESH
+import co.touchlab.kampkit.WORKER_URL
 import co.touchlab.kampkit.ktor.worker.request.WorkerRequest
 
 import co.touchlab.kampkit.response.Worker
@@ -18,14 +20,17 @@ import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.delete
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.Parameters
+import io.ktor.http.cio.Response
 import io.ktor.http.encodedPath
 import io.ktor.http.takeFrom
 import io.ktor.serialization.kotlinx.json.json
@@ -95,16 +100,24 @@ class WorkerApiImpl(private val log: Logger, engine: HttpClientEngine, dbHelper:
 
     override suspend fun getWorkers(): List<Worker> {
        return httpClient.get{
-           workers("test/worker")
+           workers(WORKER_URL)
        }.body()
     }
 
     override suspend fun saveWorker(worker: WorkerRequest): Worker {
         return httpClient.post{
-            saveWorker("test/worker")
+            saveWorker(WORKER_URL)
             setBody(worker)
             header(HttpHeaders.ContentType, ContentType.Application.Json)
         }.body()
+    }
+
+    override suspend fun deleteWorker(worker: WorkerRequest) : Int {
+        return httpClient.delete {
+            deleteWorker(WORKER_URL)
+            setBody(worker)
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
+        }.status.value
     }
 
 
@@ -120,6 +133,13 @@ class WorkerApiImpl(private val log: Logger, engine: HttpClientEngine, dbHelper:
             takeFrom("https://nasone.herokuapp.com/")
             encodedPath = path
 
+        }
+    }
+
+    private fun HttpRequestBuilder.deleteWorker(path: String){
+        url {
+            takeFrom(BASE_URL)
+            encodedPath = path
         }
     }
 

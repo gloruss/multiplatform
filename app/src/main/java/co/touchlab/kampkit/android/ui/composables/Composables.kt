@@ -3,17 +3,16 @@ package co.touchlab.kampkit.android.ui
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.net.Uri
 import android.widget.Toast
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.TweenSpec
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,56 +25,41 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
+import androidx.compose.material.DismissDirection
+import androidx.compose.material.DismissState
+import androidx.compose.material.DismissValue
 import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.FractionalThreshold
+import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Surface
+import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.rememberDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import co.touchlab.kampkit.android.BuildConfig
 import co.touchlab.kampkit.android.R
 import co.touchlab.kampkit.android.ui.composables.getQrCodeBitmap
-import co.touchlab.kampkit.db.Breed
-import co.touchlab.kampkit.models.DataState
-import co.touchlab.kampkit.models.ItemDataSummary
 import co.touchlab.kampkit.response.Worker
-
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.EncodeHintType
-import com.google.zxing.qrcode.QRCodeWriter
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 @Composable
 fun Empty() {
@@ -183,11 +167,18 @@ fun LoginFields(
 
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun WorkerList(workers : List<Worker>){
+fun WorkerList(workers : List<Worker>, onWorkerDelete : (Worker) -> Unit){
     LazyColumn{
-        items(workers){
-            WorkerRow(worker = it)
+        items(workers, {workers : Worker -> workers.uuid }){
+            item ->
+            val dismissState = rememberDismissState()
+
+            if (dismissState.isDismissed(DismissDirection.EndToStart)) {
+               onWorkerDelete(item)
+            }
+            WorkerRow(worker = item, dismissState)
             Divider()
         }
 
@@ -196,19 +187,52 @@ fun WorkerList(workers : List<Worker>){
 
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun WorkerRow(worker: Worker ){
+fun WorkerRow(worker: Worker, dismissState : DismissState ){
     val bitmap = getQrCodeBitmap(worker.uuid)
     val context = LocalContext.current
-    Row(
-        Modifier.padding(10.dp)
-    ){
+    SwipeToDismiss(state = dismissState, background = {
+        val color by animateColorAsState(
+            when (dismissState.targetValue) {
+                DismissValue.Default -> Color.White
+                else -> Color.Red
+            }
+        )
+        val alignment = Alignment.CenterEnd
+        val icon = Icons.Default.Delete
+
+        val scale by animateFloatAsState(
+            if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
+        )
+
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(color)
+                .padding(horizontal = Dp(20f)),
+            contentAlignment = alignment
+        ) {
+            Icon(
+                icon,
+                contentDescription = "Delete Icon",
+                modifier = Modifier.scale(scale)
+            )
+        }
+    }, modifier = Modifier.padding(10.dp), directions =setOf(
+        DismissDirection.EndToStart
+    ) , dismissThresholds = { direction ->
+        FractionalThreshold(if (direction == DismissDirection.EndToStart) 0.1f else 0.05f)
+    }, dismissContent = {
         Text(text = worker.name, Modifier.weight(1F))
         Spacer(Modifier.weight(1f))
         Image(bitmap = bitmap.asImageBitmap(), contentDescription = "Qrcode", modifier = Modifier.clickable { shareBitmap(bitmap,
             context) } )
+    })
 
-    }
+
+
+
 }
 
 

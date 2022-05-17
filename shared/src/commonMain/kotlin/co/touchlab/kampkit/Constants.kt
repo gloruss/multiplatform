@@ -10,3 +10,5 @@ const val FIREBASE_AUTH_REFRESH = "https://securetoken.googleapis.com/v1/token?k
 const val FIREBASE_AUTH_SIGNIN = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=$FIREBASE_APIKEY"
 const val FIREBASE_AUTH_DELETE = "https://identitytoolkit.googleapis.com/v1/accounts:delete?key=$FIREBASE_APIKEY"
 const val KEY_USER_CACHE = "key_user_cache"
+const val BASE_URL = "https://nasone.herokuapp.com/"
+const val WORKER_URL = "test/worker"

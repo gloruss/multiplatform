@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.text.SimpleDateFormat
 
 class WorkerViewModel : ViewModel(), KoinComponent {
 
@@ -72,9 +71,17 @@ class WorkerViewModel : ViewModel(), KoinComponent {
     fun saveWorker(name : String){
         scope.launch {
             log.d{"save Worker"}
-            workerModel.insertWorker(WorkerRequest(name,"123456qwer"))
+            workerModel.insertWorker(WorkerRequest(name,))
         }
     }
+
+    fun deleteWorker(worker: Worker){
+        scope.launch {
+            log.d("delete worker")
+            workerModel.deleteWorker(WorkerRequest(worker.name,worker.uuid))
+        }
+    }
+
 
 
 }

@@ -3,7 +3,6 @@ package co.touchlab.kampkit.android.ui.composables
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -31,14 +30,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.flowWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import co.touchlab.kampkit.android.R
 import co.touchlab.kampkit.android.ui.Error
 import co.touchlab.kampkit.android.ui.WorkerList
 import co.touchlab.kampkit.android.ui.viewmodel.WorkerViewModel
 import co.touchlab.kampkit.models.DataState
 import co.touchlab.kampkit.response.Worker
-import co.touchlab.kermit.Logger
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import org.koin.androidx.compose.getViewModel
@@ -54,14 +51,16 @@ fun WorkersScreen(
     @SuppressLint("StateFlowValueCalledInComposition")
     val workersState by lifecycleAwareWorkesFlow.collectAsState(initial = viewModel.workersFlow.value)
 
-    WorkerScreenContent(workersState = workersState, onRefresh = {viewModel.refreshWorkers(true)}, onConfirm = {viewModel.saveWorker(it)})
+    WorkerScreenContent(workersState = workersState, onRefresh = {viewModel.refreshWorkers(true)}, onConfirm = {viewModel.saveWorker(it)}, onDeleteWorker = {viewModel.deleteWorker(it)})
 }
 
 @Composable
 fun WorkerScreenContent(
     workersState : DataState<List<Worker>>,
     onRefresh: () -> Unit = {},
-    onConfirm : (String) -> Unit, ){
+    onConfirm : (String) -> Unit,
+    onDeleteWorker : (Worker) -> Unit
+){
 
     val showDialog = remember { mutableStateOf(false) }
     var name by remember { mutableStateOf("") }
@@ -120,7 +119,7 @@ fun WorkerScreenContent(
                     val data = workersState.data
 
                     if(data != null){
-                        WorkerList(workers = data)
+                        WorkerList(workers = data, onDeleteWorker)
                     }
                     val exception = workersState.exception
                     if(exception != null){

@@ -9,6 +9,7 @@ import co.touchlab.kampkit.response.toDB
 import co.touchlab.kampkit.response.toObject
 import co.touchlab.kermit.Logger
 import com.russhwolf.settings.Settings
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.mapNotNull
@@ -87,6 +88,24 @@ class WorkersModel : KoinComponent {
         } catch (exception: Exception) {
             log.e(exception) { "Error insert workers" }
             DataState(exception = "Unable insert workers", empty = false)
+        }
+    }
+
+
+    suspend fun deleteWorker(worker : WorkerRequest) : DataState<Boolean>{
+        return try {
+            val response = workerApi.deleteWorker(worker)
+            if(response == HttpStatusCode.OK.value){
+                dbHelper.deleteWorker(worker.uuid!!)
+                DataState(data = true)
+            }
+            else{
+                DataState(exception = "Unable delete workers")
+            }
+        }
+        catch (exception: Exception) {
+            log.e(exception) { "Server error" }
+            DataState(exception = "Server error")
         }
     }
 
