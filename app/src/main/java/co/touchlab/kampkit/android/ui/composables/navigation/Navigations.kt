@@ -13,12 +13,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import co.touchlab.kampkit.android.WORKERUUID_PARAM
 
 const val MAIN_ROUTE = "main"
 const val WORKERS_ROUTE = "workers"
 const val SCANNER_ROUTE ="qr_scanner"
 const val LOGIN_ROUTE = "login"
-
+const val REPORT_ROUTE = "report"
+const val WORKERS_LIST ="workers_list"
 
 
 
@@ -27,6 +29,8 @@ sealed class NavRoutes(val route: String) {
     object Workers : NavRoutes(WORKERS_ROUTE)
     object Scanner : NavRoutes(SCANNER_ROUTE)
     object Login : NavRoutes(LOGIN_ROUTE)
+    object Report : NavRoutes(REPORT_ROUTE)
+    object WorkersList : NavRoutes(WORKERS_LIST)
 }
 
 

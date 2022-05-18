@@ -15,9 +15,14 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import co.touchlab.kampkit.android.WORKERUUID_PARAM
+import co.touchlab.kampkit.android.WORKER_NAME_PARAM
+import co.touchlab.kampkit.android.ui.composables.badge.BadgeScreen
 import co.touchlab.kampkit.android.ui.composables.navigation.BottomNavigationBar
 import co.touchlab.kampkit.android.ui.composables.navigation.NavRoutes
 
@@ -40,7 +45,7 @@ fun MainNavigationHost(navController: NavHostController){
         startDestination = NavRoutes.Workers.route,
     ) {
         composable(NavRoutes.Workers.route) {
-            WorkersScreen()
+            WorkerNavigationHost()
         }
 
         composable(NavRoutes.Scanner.route) {
@@ -50,6 +55,24 @@ fun MainNavigationHost(navController: NavHostController){
     }
 }
 
+
+@Composable
+fun WorkerNavigationHost(){
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = NavRoutes.WorkersList.route){
+        composable(NavRoutes.WorkersList.route){
+            WorkersScreen(navController)
+        }
+        composable(NavRoutes.Report.route + "/{$WORKERUUID_PARAM}/{$WORKER_NAME_PARAM}", arguments = listOf(navArgument(WORKERUUID_PARAM) { type = NavType.StringType },
+            navArgument(WORKER_NAME_PARAM) { type = NavType.StringType })
+        ){
+            entry ->
+            val workeruuid = entry.arguments?.getString(WORKERUUID_PARAM) ?: ""
+            val name = entry.arguments?.getString(WORKER_NAME_PARAM) ?: ""
+            BadgeScreen(workerUuid = workeruuid,name = name)
+        }
+    }
+}
 
 
 

@@ -7,4 +7,6 @@ interface BadgeApi {
 
     suspend fun insertBadge(badge : BadgeRequest) : Badge
 
+    suspend fun getBadge(badge: BadgeRequest) : Badge
+
 }

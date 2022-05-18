@@ -19,13 +19,25 @@ class BadgeModel : KoinComponent {
 
     suspend fun badge(badgeRequest: BadgeRequest) : DataState<Badge>{
         return try {
-
             val result = api.insertBadge(badgeRequest)
             DataState(result, empty = false)
         }
         catch (exception : Exception){
             log.e(exception) { "Error badge worker" }
             DataState(exception = "Unable badge worker",empty = false)
+        }
+    }
+
+
+    suspend fun getBadge(badgeRequest: BadgeRequest) : DataState<Badge>{
+        return try {
+            val badge = api.getBadge(badgeRequest)
+            DataState(badge)
+        }
+        catch (exception : Exception){
+            val message =  "Error get badge for worker ${badgeRequest.worker_uuid} in data ${badgeRequest.time}"
+            log.e(exception) { message}
+            DataState(exception=message)
         }
     }
 

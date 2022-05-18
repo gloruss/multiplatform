@@ -12,3 +12,6 @@ const val FIREBASE_AUTH_DELETE = "https://identitytoolkit.googleapis.com/v1/acco
 const val KEY_USER_CACHE = "key_user_cache"
 const val BASE_URL = "https://nasone.herokuapp.com/"
 const val WORKER_URL = "test/worker"
+const val BADGE_URL = "test/badge"
+const val QUERY_PARAM_UUID = "uuid"
+const val QUERY_PARAM_DATE ="date"

@@ -167,73 +167,7 @@ fun LoginFields(
 
 
 
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun WorkerList(workers : List<Worker>, onWorkerDelete : (Worker) -> Unit){
-    LazyColumn{
-        items(workers, {workers : Worker -> workers.uuid }){
-            item ->
-            val dismissState = rememberDismissState()
 
-            if (dismissState.isDismissed(DismissDirection.EndToStart)) {
-               onWorkerDelete(item)
-            }
-            WorkerRow(worker = item, dismissState)
-            Divider()
-        }
-
-    }
-}
-
-
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun WorkerRow(worker: Worker, dismissState : DismissState ){
-    val bitmap = getQrCodeBitmap(worker.uuid)
-    val context = LocalContext.current
-    SwipeToDismiss(state = dismissState, background = {
-        val color by animateColorAsState(
-            when (dismissState.targetValue) {
-                DismissValue.Default -> Color.White
-                else -> Color.Red
-            }
-        )
-        val alignment = Alignment.CenterEnd
-        val icon = Icons.Default.Delete
-
-        val scale by animateFloatAsState(
-            if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
-        )
-
-        Box(
-            Modifier
-                .fillMaxSize()
-                .background(color)
-                .padding(horizontal = Dp(20f)),
-            contentAlignment = alignment
-        ) {
-            Icon(
-                icon,
-                contentDescription = "Delete Icon",
-                modifier = Modifier.scale(scale)
-            )
-        }
-    }, modifier = Modifier.padding(10.dp), directions =setOf(
-        DismissDirection.EndToStart
-    ) , dismissThresholds = { direction ->
-        FractionalThreshold(if (direction == DismissDirection.EndToStart) 0.1f else 0.05f)
-    }, dismissContent = {
-        Text(text = worker.name, Modifier.weight(1F))
-        Spacer(Modifier.weight(1f))
-        Image(bitmap = bitmap.asImageBitmap(), contentDescription = "Qrcode", modifier = Modifier.clickable { shareBitmap(bitmap,
-            context) } )
-    })
-
-
-
-
-}
 
 
 

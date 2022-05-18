@@ -5,10 +5,12 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import co.touchlab.kampkit.AppInfo
+import co.touchlab.kampkit.android.ui.viewmodel.BadgeReportViewModel
 import co.touchlab.kampkit.android.ui.viewmodel.BadgeViewModel
 import co.touchlab.kampkit.android.ui.viewmodel.UserViewModel
 import co.touchlab.kampkit.android.ui.viewmodel.WorkerViewModel
 import co.touchlab.kampkit.initKoin
+import co.touchlab.kampkit.models.BadgeModel
 import co.touchlab.kampkit.models.WorkersModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -23,6 +25,7 @@ class MainApp : Application() {
                 viewModel { UserViewModel() }
                 viewModel { WorkerViewModel() }
                 viewModel{ BadgeViewModel()}
+                viewModel{BadgeReportViewModel(get())  }
                 single<SharedPreferences> {
                     get<Context>().getSharedPreferences("KAMPSTARTER_SETTINGS", Context.MODE_PRIVATE)
                 }
@@ -31,6 +34,7 @@ class MainApp : Application() {
                     { Log.i("Startup", "Hello from Android/Kotlin!") }
                 }
                 single{WorkersModel()}
+                single { BadgeModel() }
             }
         )
     }

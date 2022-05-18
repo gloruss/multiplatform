@@ -1,5 +1,6 @@
 package co.touchlab.kampkit.android.ui.viewmodel
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kampkit.injectLogger
@@ -15,6 +16,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -22,7 +24,7 @@ class BadgeViewModel : ViewModel(), KoinComponent {
 
     private val log: Logger by injectLogger("BadgeViewModel")
     private val scope = viewModelScope
-    private val badgeModel = BadgeModel()
+    private val badgeModel by inject<BadgeModel>()
     private val workersModel by inject<WorkersModel>()
     private val _badgeFlow : MutableStateFlow<DataState<Badge>> = MutableStateFlow(
         DataState(loading = false, empty = true)
@@ -30,6 +32,8 @@ class BadgeViewModel : ViewModel(), KoinComponent {
     val badgeFlow: StateFlow<DataState<Badge>> = _badgeFlow
     var sdf: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ITALY)
     var badging = false
+
+
 
 
     fun badge(workerUID : String){
@@ -54,5 +58,7 @@ class BadgeViewModel : ViewModel(), KoinComponent {
     fun badgeResultViewed(){
         _badgeFlow.value = DataState(loading = false, empty = true)
     }
+
+
 
 }
